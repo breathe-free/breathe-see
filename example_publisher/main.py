@@ -9,6 +9,7 @@ import csv
 # csv file columns are timestamp, pressure, CO2, ...
 EXAMPLE_DATA = os.path.join(os.path.dirname(__file__), "1426701684-sample-breathing.csv")
 SOCKET_PATH = '/tmp/lucidity.socket'
+TIME_WARP = float(os.environ.get('TIME_WARP', 1.0))
 
 class SocketNotFound(Exception):
     pass
@@ -57,7 +58,7 @@ while True:
         if index >= len(datapoints):
             index = 0
 
-        time.sleep(0.2)
+        time.sleep(0.2 / TIME_WARP)
     except KeyboardInterrupt:
         break
 
