@@ -72,7 +72,8 @@ function handleData(incoming) {
         // Top-level data array has newest values at the front
         data.unshift({ timestamp: latestTimestamp, values: [
             parseFloat(newData[1]),
-            parseFloat(newData[2]) * 100
+            parseFloat(newData[2]) * 100,
+            parseFloat(newData[3])
         ] });
     }
 
@@ -84,6 +85,7 @@ function handleData(incoming) {
 function doPlot() {
     plotData(getDataForPlot(0), 0);
     plotData(getDataForPlot(1), 1);   
+    plotData(getDataForPlot(2), 2);   
 }
 if (mode == 'periodic') {
     setInterval(doPlot, 250);
