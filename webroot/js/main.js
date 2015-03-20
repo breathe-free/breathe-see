@@ -10,6 +10,24 @@ var chartLines = []; // references to the plotted lines
 
 var xAxisSpan = 30.0; // seconds
 
+// Read the querystring into qs
+var qs = (function(a) {
+        if (a == "") return {};
+        var b = {};
+        for (var i = 0; i < a.length; ++i)
+        {
+            var p=a[i].split('=');
+            if (p.length != 2) continue;
+            b[p[0]] = decodeURIComponent(p[1].replace(/\+/g, " "));
+        }
+        return b;
+    })(window.location.search.substr(1).split('&'));
+
+
+var mode = 'now';
+if (qs.mode == 'periodic') {
+    mode = 'periodic';  // for periodic redraws, instead of as soon as data received
+}
 
 function plotData(mydata, seriesIndex) {
     // Plot array. Input array should be an array of objects with x and y members.
@@ -41,25 +59,37 @@ function getDataForPlot(seriesIndex) {
 }
 
 function handleData(incoming) {
-    // incoming.data is a comma-separated list of numbers
+    // incoming.data is an array of comma-separated lists of numbers
     // The first column always contains a unix timestamp
     // (referenced from the system clock on the publisher)
-    var newData = incoming.data.split(",");
-    
-    latestTimestamp = parseFloat(newData[0]);
+    // console.log(incoming.data);
 
-    // Top-level data array has newest values at the front
-    data.unshift({ timestamp: latestTimestamp, values: [
-        parseFloat(newData[1]),
-        parseFloat(newData[2]) * 100
-    ] });
+    for(var i = 0; i<incoming.data.length; i++) {
 
-    plotData(getDataForPlot(0), 0);
-    plotData(getDataForPlot(1), 1);
+        var newData = incoming.data[i].split(",");
+        latestTimestamp = parseFloat(newData[0]);
 
+        // Top-level data array has newest values at the front
+        data.unshift({ timestamp: latestTimestamp, values: [
+            parseFloat(newData[1]),
+            parseFloat(newData[2]) * 100
+        ] });
+    }
+
+    if (mode=='now') {
+        doPlot();
+    }
 }
 
-// call the plot function when new data arrives
+function doPlot() {
+    plotData(getDataForPlot(0), 0);
+    plotData(getDataForPlot(1), 1);   
+}
+if (mode == 'periodic') {
+    setInterval(doPlot, 250);
+}
+
+// call the handleData function when new data arrives
 client.subscribe('/data', handleData);
 
 // Set the dimensions of the canvas / graph
