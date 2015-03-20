@@ -7,9 +7,10 @@ import random
 import csv
 
 # csv file columns are timestamp, pressure, CO2, ...
-EXAMPLE_DATA = os.path.join(os.path.dirname(__file__), "1426701684-sample-breathing.csv")
-SOCKET_PATH = '/tmp/lucidity.socket'
-TIME_WARP = float(os.environ.get('TIME_WARP', 1.0))
+EXAMPLE_DATA      = os.path.join(os.path.dirname(__file__), "1426701684-sample-breathing.csv")
+SOCKET_PATH       = '/tmp/lucidity.socket'
+TIME_WARP         = float(os.environ.get('TIME_WARP', 1.0))
+MAX_LINES_AT_ONCE = int(os.environ.get('MAX_LINES_AT_ONCE'), 5)
 
 class SocketNotFound(Exception):
     pass
@@ -43,7 +44,9 @@ except (SocketNotFound, socket.error), msg:
     output = printout
 
 # Until user hits Ctrl+C, send sample data down the socket.
+lines_buffered = 0
 index = 0
+output_text = ""
 while True:
     try:
         datapoint = datapoints[index]
@@ -51,7 +54,15 @@ while True:
         # Replace the first member of datapoint with the current timestamp
         datapoint[0] = time.time()
 
-        output( ",".join([str(x) for x in datapoint]) )
+        output_text += ",".join([str(x) for x in datapoint]) + "\n"
+        lines_buffered += 1
+
+        # Deliberately lumpy output.  Output data if the 'buffer' is full, or on a random spin.
+        if lines_buffered >= MAX_LINES_AT_ONCE or random.random() < 0.3:
+            output( output_text )
+
+            output_text = ""
+            lines_buffered = 0
 
         # increment index and loop back round
         index += 1
