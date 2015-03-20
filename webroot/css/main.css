@@ -1,8 +1,14 @@
 body { font: 12px Arial;}
 path { 
-    stroke: steelblue;
+    stroke: grey;
     stroke-width: 2;
     fill: none;
+}
+path.line0 {
+	stroke: red;
+}
+path.line1 {
+	stroke: steelblue;
 }
 .axis path,
 .axis line {

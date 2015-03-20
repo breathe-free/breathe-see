@@ -6,23 +6,23 @@ var client = new Faye.Client('/faye');
 // Top-level variables hold data points received and other values
 var data = [];
 var latestTimestamp;
-var myline = false; // a reference to the plotted line
+var chartLines = []; // references to the plotted lines
 
-var xAxisSpan = 5.0; // seconds
+var xAxisSpan = 30.0; // seconds
 
 
-function plotData(mydata) {
+function plotData(mydata, seriesIndex) {
     // Plot array. Input array should be an array of objects with x and y members.
-    // Clear any existing line first
-    if (myline) {
-        myline.remove();
+    
+    // Clear any existing line for this series first
+    if (chartLines[seriesIndex]) {
+        chartLines[seriesIndex].remove();
     }
 
-    myline = svg.append("path").attr("class", "line").attr("d", valueline(mydata));
-
+    chartLines[seriesIndex] = svg.append("path").attr("class", "line" + seriesIndex).attr("d", valueline(mydata));
 }
 
-function getDataForPlot() {
+function getDataForPlot(seriesIndex) {
     // return an array of objects with x and y members
     // x=0 corresponds to latestTimestamp
     // x=10 corresponds to 10 seconds ago, and so on
@@ -31,7 +31,7 @@ function getDataForPlot() {
         var datapoint = data[i];
         outputArray.push({
             x: latestTimestamp - datapoint.timestamp,
-            y: datapoint.values[0]
+            y: datapoint.values[seriesIndex]
         });
         if (latestTimestamp - datapoint.timestamp > xAxisSpan) {
             break
@@ -45,16 +45,17 @@ function handleData(incoming) {
     // The first column always contains a unix timestamp
     // (referenced from the system clock on the publisher)
     var newData = incoming.data.split(",");
-    console.log(newData);
-
+    
     latestTimestamp = parseFloat(newData[0]);
 
     // Top-level data array has newest values at the front
     data.unshift({ timestamp: latestTimestamp, values: [
-        parseFloat(newData[1])
+        parseFloat(newData[1]),
+        parseFloat(newData[2]) * 100
     ] });
 
-    plotData(getDataForPlot());
+    plotData(getDataForPlot(0), 0);
+    plotData(getDataForPlot(1), 1);
 
 }
 
