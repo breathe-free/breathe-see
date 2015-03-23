@@ -31,8 +31,16 @@ try:
     # Create a UDS socket
     sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
 
+    sock.setblocking(0)   # important - don't block on reads
     sock.connect(SOCKET_PATH)
     output = sock.sendall
+    def receive(the_socket):
+        # Return either an empty string (if nothing received)
+        # or the contents of any incoming message
+        try:
+            return the_socket.recv(1024)
+        except socket.error:
+            return ""
 
 except (SocketNotFound, socket.error), msg:
     print >>sys.stderr, msg
@@ -42,6 +50,7 @@ except (SocketNotFound, socket.error), msg:
     def printout(s):
         print >>sys.stdout, s
     output = printout
+    receive = lambda x: ""
 
 # Until user hits Ctrl+C, send sample data down the socket.
 lines_buffered = 0
@@ -49,6 +58,11 @@ index = 0
 output_text = ""
 while True:
     try:
+        # read from sock
+        received = receive(sock)
+        if received:
+            print "Received: %s" % received
+
         datapoint = datapoints[index]
 
         # Replace the first member of datapoint with the current timestamp
@@ -59,6 +73,7 @@ while True:
 
         # Deliberately lumpy output.  Output data if the 'buffer' is full, or on a random spin.
         if lines_buffered >= MAX_LINES_AT_ONCE or random.random() < 0.3:
+            print "emitting data"
             output( output_text )
 
             output_text = ""

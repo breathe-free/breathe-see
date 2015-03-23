@@ -26,12 +26,32 @@ if (fs.existsSync(sockfile)) {
 	fs.unlinkSync(sockfile);
 }
 
-// Set up - create the socket and listen for data.
+// Set up - create the socket and accept max 1 connection
+var otherProcess = false;
 var unixServer = net.createServer(function(client) {
-	client.on('data', handleSocketData);
-	// TODO - handle disconnect, errors, etc.
+  // TODO - handle errors, etc.
+
+  console.info('Client connected.');
+  otherProcess = client;
+
+  // handle any data the client sends to us
+  client.on('data', handleSocketData);
+
+  client.on('end', function() {
+    console.info('Client disconnected.');
+    otherProcess = false;
+  });
 });
 unixServer.listen(sockfile);
+unixServer.maxConnections = 1;
+
+setInterval(function() {
+  if (otherProcess.writable) {
+    otherProcess.write('parp');
+  } else {
+    //console.log('nodbody there');
+  }
+}, 1000);
 
 var buffer = '';
 function handleSocketData(data) {
