@@ -94,6 +94,11 @@ if (mode == 'periodic') {
 // call the handleData function when new data arrives
 client.subscribe('/data', handleData);
 
+// send any instructions
+function sendInstruction(instruction) {
+    client.publish('/instructions', {instruction: instruction});
+}
+
 // Set the dimensions of the canvas / graph
 var margin = {top: 30, right: 20, bottom: 30, left: 50},
 width  = 1000 - margin.left - margin.right,

@@ -56,12 +56,17 @@ except (SocketNotFound, socket.error), msg:
 lines_buffered = 0
 index = 0
 output_text = ""
+mode = "running"
 while True:
     try:
         # read from sock
         received = receive(sock)
         if received:
             print "Received: %s" % received
+            if received == "stopsampling":
+                mode = "stopped"
+            else:
+                mode = "running"
 
         datapoint = datapoints[index]
 
@@ -73,8 +78,8 @@ while True:
 
         # Deliberately lumpy output.  Output data if the 'buffer' is full, or on a random spin.
         if lines_buffered >= MAX_LINES_AT_ONCE or random.random() < 0.3:
-            print "emitting data"
-            output( output_text )
+            if mode == "running":
+                output( output_text )
 
             output_text = ""
             lines_buffered = 0
