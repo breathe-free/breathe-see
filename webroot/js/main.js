@@ -36,8 +36,8 @@ function plotData(mydata, seriesIndex) {
     if (chartLines[seriesIndex]) {
         chartLines[seriesIndex].remove();
     }
-
-    chartLines[seriesIndex] = svg.append("path").attr("class", "line" + seriesIndex).attr("d", valueline(mydata));
+    var axis = seriesAxis[seriesIndex];
+    chartLines[seriesIndex] = svg.append("path").attr("class", "line" + seriesIndex).attr("d", getLine(axis)(mydata));
 }
 
 function getDataForPlot(seriesIndex) {
@@ -72,7 +72,7 @@ function handleData(incoming) {
         // Top-level data array has newest values at the front
         data.unshift({ timestamp: latestTimestamp, values: [
             parseFloat(newData[1]),
-            parseFloat(newData[2]) * 100,
+            parseFloat(newData[2]),
             parseFloat(newData[3])
         ] });
     }
@@ -106,21 +106,26 @@ width  = body.clientWidth - margin.left - margin.right,
 height = body.clientHeight - margin.top  - margin.bottom;
 
 // Set the ranges
-var x = d3.scale.linear().range([0, width]);
-var y = d3.scale.linear().range([height, 0]);
+var x      = d3.scale.linear().range([0, width]);
+var yLeft  = d3.scale.linear().range([height, 0]);
+var yRight = d3.scale.linear().range([height, 0]);
 
 // Define the axes
-var xAxis = d3.svg.axis().scale(x).orient("bottom").ticks(5);
-var yAxis = d3.svg.axis().scale(y).orient("left").ticks(5);
+var xAxis      = d3.svg.axis().scale(x).orient("bottom").ticks(5);
+var yAxisLeft  = d3.svg.axis().scale(yLeft).orient("left").ticks(5);
+var yAxisRight = d3.svg.axis().scale(yRight).orient("right").ticks(5);
 
-// Define the line
-var valueline = d3.svg.line()
-.x(function(d) { return x(d.x); })
-.y(function(d) { return y(d.y); });
+var seriesAxis = [yLeft, yRight, yLeft];
+
+function getLine(yAxis) {
+    // Define the line
+    return d3.svg.line()
+    .x(function(d) { return x(d.x); })
+    .y(function(d) { return yAxis(d.y); });
+}
 
 // Adds the svg canvas
-var svg = d3.select("body")
-    .append("svg")
+var svg = d3.select("svg")
     .attr("width", width + margin.left + margin.right)
     .attr("height", height + margin.top + margin.bottom)
     .append("g")
@@ -129,7 +134,8 @@ var svg = d3.select("body")
 
 // Scale the range of the data
 x.domain([0, xAxisSpan]);
-y.domain([-500, 2000]);
+yLeft.domain([-500, 1000]);
+yRight.domain([0, 10]);
 
 // Add the X Axis
 svg.append("g")
@@ -137,8 +143,12 @@ svg.append("g")
 .attr("transform", "translate(0," + height + ")")
 .call(xAxis);
 
-// Add the Y Axis
+// Add the Y Axes
 svg.append("g")
 .attr("class", "y axis")
-.call(yAxis);
+.call(yAxisLeft);
 
+svg.append("g")
+.attr("class", "y axis")
+.attr("transform", "translate(" + width + ", 0)")
+.call(yAxisRight);
