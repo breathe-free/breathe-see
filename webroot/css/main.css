@@ -21,3 +21,7 @@ path.line2 {
     stroke-width: 1;
     shape-rendering: crispEdges;
 }
+svg {
+    display: block;
+    border: 1px solid rgba(0,0,0,0.1);
+}

@@ -100,9 +100,10 @@ function sendInstruction(instruction) {
 }
 
 // Set the dimensions of the canvas / graph
-var margin = {top: 30, right: 20, bottom: 30, left: 50},
-width  = 1000 - margin.left - margin.right,
-height =  800 - margin.top  - margin.bottom;
+var body = d3.select("body")[0][0];
+var margin = {top: 30, right: 50, bottom: 30, left: 50},
+width  = body.clientWidth - margin.left - margin.right,
+height = body.clientHeight - margin.top  - margin.bottom;
 
 // Set the ranges
 var x = d3.scale.linear().range([0, width]);
