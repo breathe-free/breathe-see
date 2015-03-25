@@ -7,7 +7,7 @@ import random
 import csv
 
 # csv file columns are timestamp, pressure, CO2, ...
-EXAMPLE_DATA      = os.path.join(os.path.dirname(__file__), "1426701684-sample-breathing.csv")
+EXAMPLE_DATA      = os.path.join(os.path.dirname(__file__), "1427199271-sample-breathing.csv")
 SOCKET_PATH       = '/tmp/lucidity.socket'
 TIME_WARP         = float(os.environ.get('TIME_WARP', 1.0))
 MAX_LINES_AT_ONCE = int(os.environ.get('MAX_LINES_AT_ONCE', 1))
