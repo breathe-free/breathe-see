@@ -45,9 +45,9 @@ var unixServer = net.createServer(function(client) {
 unixServer.listen(sockfile);
 unixServer.maxConnections = 1;
 
-function sendInstruction(instruction) {
+function sendCommand(command) {
   if (otherProcess.writable) {
-    otherProcess.write(instruction);
+    otherProcess.write(JSON.stringify(command));
   } else {
     //console.log('nodbody there');
   }
@@ -103,7 +103,7 @@ var server = app.listen(port, function () {
 // Use Faye on the Express app for passing messages to/from browsers
 bayeux.attach(server);
 
-// Listen for any instructions
-fayeClient.subscribe('/instructions', function(data) {
-  sendInstruction(data.instruction);
+// Listen for any commands, just pass them on
+fayeClient.subscribe('/commands', function(command) {
+  sendCommand(command);
 });

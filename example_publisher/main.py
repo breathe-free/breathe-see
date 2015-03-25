@@ -5,6 +5,7 @@ import os
 import time
 import random
 import csv
+import json
 
 # csv file columns are timestamp, pressure, CO2, ...
 EXAMPLE_DATA      = os.path.join(os.path.dirname(__file__), "1427199271-sample-breathing.csv")
@@ -35,12 +36,14 @@ try:
     sock.connect(SOCKET_PATH)
     output = sock.sendall
     def receive(the_socket):
-        # Return either an empty string (if nothing received)
-        # or the contents of any incoming message
+        # Return either None (if nothing received)
+        # or the JSON-decoded contents of any incoming message
         try:
-            return the_socket.recv(1024)
+            return json.loads(the_socket.recv(1024))
+        except ValueError:
+            print >>sys.stderr, str(ValueError)
         except socket.error:
-            return ""
+            return None
 
 except (SocketNotFound, socket.error), msg:
     print >>sys.stderr, msg
@@ -50,7 +53,7 @@ except (SocketNotFound, socket.error), msg:
     def printout(s):
         print >>sys.stdout, s
     output = printout
-    receive = lambda x: ""
+    receive = lambda x: None
 
 # Until user hits Ctrl+C, send sample data down the socket.
 lines_buffered = 0
@@ -61,11 +64,11 @@ while True:
     try:
         # read from sock
         received = receive(sock)
-        if received:
+        if received is not None:
             print "Received: %s" % received
-            if received == "stopsampling":
+            if received['command'] == "stop_sampling":
                 mode = "stopped"
-            else:
+            if received['command'] == "start_sampling":
                 mode = "running"
 
         datapoint = datapoints[index]

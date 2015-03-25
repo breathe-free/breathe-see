@@ -16,10 +16,14 @@ function saveSettings() {
     //serialise the form and send
     var settings = {};
     $.each(frm.serializeArray(), function( i, field ) {
-        console.log(frm.find("input[name=" + field.name + "]").attr("type"));
-        if (frm.find("input[name=" + field.name + "]").attr("type") == "number") {
+        // pass numbers as numbers
+        var fld = frm.find("input[name=" + field.name + "]");
+        var fldType = fld.attr("type");
+
+        if (fldType == "number") {
             settings[field.name] = parseFloat(field.value);    
         } else {
+            // everything else as a string
             settings[field.name] = field.value;
         }
         

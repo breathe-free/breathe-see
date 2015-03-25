@@ -5,16 +5,48 @@
 </head>
 <body>
 	<svg style="min-height: 500px; width: 100%"/>
-	<button onclick="sendInstruction('startsampling');">Start</button>
-	<button onclick="sendInstruction('stopsampling');">Stop</button>
-    <!-- load the d3.js library and faye -->    
+	<button onclick="sendCommand('start_sampling');">Start sampling</button>
+	<button onclick="sendCommand('stop_sampling');">Stop sampling</button>
+    <button onclick="sendCommand('restart_logger');">Restart logger</button>
+    <form id="settings" onsubmit="return false">
+        <p>
+            <label for="initialisation_time">Initialisation time</label>
+            <input type="number" id="initialisation_time" name="initialisation_time" />
+        </p>
+        <p>
+            <label for="sample_collection_time">Sample collection time</label>
+            <input type="number" id="sample_collection_time" name="sample_collection_time" />
+        </p>
+        <p>
+            <label for="default_trigger_co2">Default trigger limit for CO2</label>
+            <input type="number" step="0.01" id="default_trigger_co2" name="default_trigger_co2" />
+        </p>
+        <p>
+            Collection control
+            <label for="cc_pressure">
+                <input type="radio" id="cc_pressure" name="collection_control" value="p"/>
+                Pressure
+            </label>
+            <label for="cc_co2">
+                <input type="radio" id="cc_co2" name="collection_control" value="c"/>
+                CO2
+            </label>
+        </p>
+        <p>
+            <button onclick="sendCommand('request_settings');">Load</button>
+            <button onclick="saveSettings();">Save</button>
+        </p>
+    </form>
+
+    <!-- load the d3.js library, faye, jQuery. TODO: reduce external dependencies! -->    
     <script src="http://d3js.org/d3.v3.min.js"></script>
     <script src="/faye/faye.js"></script>
+    <script src="https://code.jquery.com/jquery-1.11.2.min.js"></script>
    
     <!-- Finally include our own js files. Order is important for now. -->
     <script src="/js/main.js"></script> 
     <script src="/js/config.js"></script> 
     <script src="/js/plotting.js"></script> 
-    <script src="/js/instructions.js"></script> 
+    <script src="/js/commands.js"></script> 
 </body>
 
