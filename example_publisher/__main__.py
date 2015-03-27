@@ -7,6 +7,7 @@ import random
 import csv
 import json
 import random
+from sentence_generator import make_sentence
 
 # csv file columns are timestamp, pressure, CO2, ...
 EXAMPLE_DATA      = os.path.join(os.path.dirname(__file__), "1427199271-sample-breathing.csv")
@@ -73,14 +74,22 @@ class Publisher:
         self.lines_buffered = 0
         self.index = 0
         self.buffer = ""
+        self.state = None
         self.change_state(STATES.INITIALISING)
 
-    def change_state(self, new_state):
-        self.state = new_state
-        self.emit_state()
+    def change_state(self, new_state, message=None, severity=None):
+        if self.state != new_state:
+            message = "State changed to %s." % new_state
+            severity = "info"
 
-    def emit_state(self):
-        output(json.dumps({"state":self.state}) + "\n")        
+        self.state = new_state
+        self.emit_state(message=message, severity="info")
+
+    def emit_state(self, **kwargs):
+        h = {"state": self.state}
+        for key,val in kwargs.iteritems():
+            h[key] = val
+        output(json.dumps(h) + "\n")        
 
     def run(self):
         # Wait a while to simulate initialisation
@@ -137,6 +146,19 @@ class Publisher:
                 self.index += 1
                 if self.index >= len(datapoints):
                     self.index = 0
+
+                # Emit some random debugging every now and then
+                if self.state == STATES.WAITING:
+                    if random.random() < 0.1:
+                        self.emit_state(message="Waiting" + "." * random.randint(2,5))
+                else:
+                    x = random.random()
+                    if x < 0.05:
+                        self.emit_state(message="ERROR: " + make_sentence(), severity="error")
+                    elif x < 0.1:
+                        self.emit_state(message="WARNING: " + make_sentence(), severity="warning")
+                    elif x < 0.5:
+                        self.emit_state(message=make_sentence())
 
                 time.sleep(0.2 / TIME_WARP)
 

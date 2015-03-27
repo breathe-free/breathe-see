@@ -13,8 +13,11 @@ breatheSeeApp.factory('Faye', [
 breatheSeeApp.controller('MainCtrl', function ($scope, $http, Faye) {
 
     // Subscribe for state changes
-    Faye.subscribe("/state", function(msg) {
-        $scope.state = msg.state;
+    Faye.subscribe("/state", function(data) {
+        $scope.state = data.state;
+        if (data.message) {
+            $scope.addMessage(data);
+        }
     });
 
     // Function for sending commands to the back end
@@ -22,9 +25,20 @@ breatheSeeApp.controller('MainCtrl', function ($scope, $http, Faye) {
         Faye.publish("/commands", {command:cmd, commandType:"command"});
     }
 
+    // What to do when new message received
+    $scope.addMessage = function(data) {
+        $scope.messages.push(data);
+        if ($scope.messages.length > $scope.maxMessages) {
+            // discard oldest messages
+            $scope.messages = $scope.messages.slice(-$scope.maxMessages);
+        }
+    }
+
     // Initialise
     $scope.state = "";
+    $scope.messages = [];
     $scope.sendCmd("request_state");
+    $scope.maxMessages = 50;
 
     // Is the state known?
     $scope.stateIsKnown = function() {
