@@ -6,6 +6,7 @@ import time
 import random
 import csv
 import json
+import random
 
 # csv file columns are timestamp, pressure, CO2, ...
 EXAMPLE_DATA      = os.path.join(os.path.dirname(__file__), "1427199271-sample-breathing.csv")
@@ -55,46 +56,95 @@ except (SocketNotFound, socket.error), msg:
     output = printout
     receive = lambda x: None
 
-# Until user hits Ctrl+C, send sample data down the socket.
-lines_buffered = 0
-index = 0
-output_text = ""
-mode = "running"
-while True:
-    try:
-        # read from sock
-        received = receive(sock)
-        if received is not None:
-            print "Received: %s" % received
-            if received['command'] == "stop_sampling":
-                mode = "stopped"
-            if received['command'] == "start_sampling":
-                mode = "running"
+def enum(**enums):
+    return type('Enum', (), enums)
 
-        datapoint = datapoints[index]
+STATES = enum(
+    INITIALISING = "initialising",
+    WAITING      = "waiting",
+    CALIBRATING  = "calibrating",
+    ANALYSING    = "analysing",
+    COLLECTING   = "collecting",
+)
+ACTIVE_STATES = [ STATES.CALIBRATING, STATES.ANALYSING, STATES.COLLECTING ]
 
-        # Replace the first member of datapoint with the current timestamp
-        datapoint[0] = time.time()
+class Publisher:
+    def __init__(self):
+        self.lines_buffered = 0
+        self.index = 0
+        self.buffer = ""
+        self.change_state(STATES.INITIALISING)
 
-        output_text += ",".join([str(x) for x in datapoint]) + "\n"
-        lines_buffered += 1
+    def change_state(self, new_state):
+        self.state = new_state
+        self.emit_state()
 
-        # Deliberately lumpy output.  Output data if the 'buffer' is full, or on a random spin.
-        if lines_buffered >= MAX_LINES_AT_ONCE or random.random() < 0.3:
-            if mode == "running":
-                output( output_text )
+    def emit_state(self):
+        output(json.dumps({"state":self.state}) + "\n")        
 
-            output_text = ""
-            lines_buffered = 0
+    def run(self):
+        # Wait a while to simulate initialisation
+        self.change_state(STATES.INITIALISING)
+        time.sleep(3.0 / TIME_WARP)
+        self.change_state(STATES.WAITING)
 
-        # increment index and loop back round
-        index += 1
-        if index >= len(datapoints):
-            index = 0
+        # Loop until user hits Ctrl+C
+        while True:
+            try:
+                # read from sock
+                received = receive(sock)
+                if received is not None:
+                    # act on information received
+                    print "Received: %s" % received
+                    if received['command'] == "stop":
+                        self.change_state(STATES.WAITING)
+                    if received['command'] == "start":
+                        self.change_state(STATES.CALIBRATING)
+                    if received['command'] == "request_state":
+                        self.emit_state()
 
-        time.sleep(0.2 / TIME_WARP)
-    except KeyboardInterrupt:
-        break
+                # While running...
+                if self.state in ACTIVE_STATES:
+                    # ...cycle through active states to simulate instrument doing things
+                    if random.random() < 0.03:
+                        current = ACTIVE_STATES.index(self.state)
+                        next = ( current + 1 ) % len(ACTIVE_STATES)
+                        self.change_state(ACTIVE_STATES[next])
+
+                # Get data (ultimately this comes from the sample file)
+                datapoint = datapoints[self.index]
+
+                # Replace the first member of datapoint with the current timestamp
+                datapoint[0] = time.time()
+
+                # Fourth column of data should be zero unless we are in collecting state
+                if self.state != STATES.COLLECTING:
+                    datapoint[3] = 0
+
+                # Put comma-separated line of data into the buffer
+                self.buffer += ",".join([str(x) for x in datapoint]) + "\n"
+                self.lines_buffered += 1
+
+                # Output data if the 'buffer' is full, or on a random spin.
+                if self.lines_buffered >= MAX_LINES_AT_ONCE or random.random() < 0.3:
+                    if self.state in ACTIVE_STATES:
+                        output( self.buffer )
+
+                    self.buffer = ""
+                    self.lines_buffered = 0
+
+                # Move to next data point.  Increment self.index and loop back round
+                self.index += 1
+                if self.index >= len(datapoints):
+                    self.index = 0
+
+                time.sleep(0.2 / TIME_WARP)
+
+            except KeyboardInterrupt:
+                break
+
+p = Publisher()
+p.run()
 
 sock.close()
 

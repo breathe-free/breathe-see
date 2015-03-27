@@ -40,6 +40,7 @@ var unixServer = net.createServer(function(client) {
   client.on('end', function() {
     console.info('Client disconnected.');
     otherProcess = false;
+    fayeClient.publish('/state', {state: 'disconnected'});
   });
 });
 unixServer.listen(sockfile);
@@ -58,21 +59,28 @@ function handleSocketData(data) {
     var newData = data.toString();
 
     // Buffer input and split on \n
-    // Call onDataRow once per row.
+    // Call onData once per line.
     buffer += newData;
     while (buffer.indexOf('\n') > 0) {
-      // Extract first row from buffer and pass to onDataRow
-      var row = buffer.split('\n')[0];
-      onDataRow(row);
+      // Extract first line from buffer and pass to onData
+      var line = buffer.split('\n')[0];
+      onData(line);
 
-      // Remove first row from buffer, rinse and repeat
+      // Remove first line from buffer, rinse and repeat
       buffer = buffer.substring(buffer.indexOf('\n') + 1);
     }
 }
 
-var bufferedRows = [];
-function onDataRow(row) {
-  bufferedRows.push(row);
+var bufferedlines = [];
+function onData(line) {
+
+  // Parse JSON and immediately transmit.
+  if (line.indexOf("{") >= 0) {
+    fayeClient.publish("/state", JSON.parse(line));
+    return;
+  }
+
+  bufferedlines.push(line);
   if (!bufferPublishing) {
     // publish right away
     publishAndClear();
@@ -80,9 +88,9 @@ function onDataRow(row) {
 }
 
 function publishAndClear() {
-  if (bufferedRows.length > 0) {
-    fayeClient.publish('/data', {data: bufferedRows});
-    bufferedRows = [];    
+  if (bufferedlines.length > 0) {
+    fayeClient.publish('/data', {data: bufferedlines});
+    bufferedlines = [];    
   }
 }
 if (bufferPublishing) {
@@ -105,5 +113,9 @@ bayeux.attach(server);
 
 // Listen for any commands, just pass them on
 fayeClient.subscribe('/commands', function(command) {
+  if ((command.command == 'request_state') && (!otherProcess.writable)) {
+    fayeClient.publish('/state', {state: 'disconnected'});
+    return;
+  }
   sendCommand(command);
 });

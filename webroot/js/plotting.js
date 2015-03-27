@@ -68,10 +68,10 @@ if (mode == 'periodic') {
 }
 
 // Set the dimensions of the canvas / graph
-var body = d3.select("body")[0][0];
+var body = d3.select("html")[0][0];
 var margin = {top: 30, right: 50, bottom: 30, left: 50},
-width  = body.clientWidth - margin.left - margin.right,
-height = body.clientHeight - margin.top  - margin.bottom;
+width  = body.clientWidth * 0.9 - margin.left - margin.right,
+height = body.clientHeight * 0.7 - margin.top  - margin.bottom;
 
 // Set the ranges
 var x      = d3.scale.linear().range([0, width]);

@@ -2,12 +2,20 @@
 <head>
     <meta charset="utf-8">
     <link rel="stylesheet" type="text/css" href="/css/main.css">
+    <script src="/bower_components/angular/angular.min.js"></script>
+    <script src="/bower_components/angular-faye/build/angular-faye.min.js"></script>
 </head>
 <body>
-	<svg style="min-height: 500px; width: 100%"/>
-	<button onclick="sendCommand('start_sampling');">Start sampling</button>
-	<button onclick="sendCommand('stop_sampling');">Stop sampling</button>
-    <button onclick="sendCommand('restart_logger');">Restart logger</button>
+    <div id="svg_wrap">
+        <svg />
+    </div>
+    <div ng-app="breatheSeeApp">
+        <form ng-controller="MainCtrl" id="main">
+            <p ng-class="{ white: !stateIsKnown() }">Current state: {{ state }}.</p>
+            <button ng-click="advanceState();" ng-disabled="badState()">{{ getStateButtonLabel() }}</button>
+        </form>
+    </div>
+    <!--
     <form id="settings" onsubmit="return false">
         <p>
             <label for="initialisation_time">Initialisation time</label>
@@ -37,6 +45,7 @@
             <button onclick="saveSettings();">Save</button>
         </p>
     </form>
+    -->
 
     <!-- load the d3.js library, faye, jQuery. TODO: reduce external dependencies! -->    
     <script src="/bower_components/d3/d3.min.js"></script>
@@ -48,5 +57,6 @@
     <script src="/js/config.js"></script> 
     <script src="/js/plotting.js"></script> 
     <script src="/js/commands.js"></script> 
+    <script src="/js/form.js"></script> 
 </body>
 

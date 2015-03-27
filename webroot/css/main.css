@@ -1,4 +1,7 @@
 body { font: 12px Arial;}
+#svg_wrap {
+    text-align: center;
+}
 path { 
     stroke: grey;
     stroke-width: 2;
@@ -23,5 +26,18 @@ path.line2 {
 }
 svg {
     display: block;
-    border: 1px solid rgba(0,0,0,0.1);
+    margin: 0 auto;
+    min-height: 300px;
+    min-width: 600px;
+    width: 90%;
+}
+button {
+    width: 10em;
+    height: 2em;
+}
+form#main {
+    text-align: center;
+}
+.white {
+    color: white;
 }
