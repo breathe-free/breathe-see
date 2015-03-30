@@ -40,11 +40,19 @@ try:
     def receive(the_socket):
         # Return either None (if nothing received)
         # or the JSON-decoded contents of any incoming message
+
+        # TODO: make this fn return an iterator.  Sometimes >1 message will have accumulated on the
+        # socket by the time we come to read it.
         try:
-            return json.loads(the_socket.recv(1024))
+            incoming = the_socket.recv(1024)
+            for line in "\n".split(incoming):
+
+            return json.loads(incoming)
         except ValueError:
             print >>sys.stderr, str(ValueError)
+            print >>sys.stderr, incoming
         except socket.error:
+            # nothing to read
             return None
 
 except (SocketNotFound, socket.error), msg:

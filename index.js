@@ -48,7 +48,7 @@ unixServer.maxConnections = 1;
 
 function sendCommand(command) {
   if (otherProcess.writable) {
-    otherProcess.write(JSON.stringify(command));
+    otherProcess.write(JSON.stringify(command) + '\n');
   } else {
     //console.log('nodbody there');
   }

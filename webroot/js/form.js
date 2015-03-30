@@ -15,11 +15,16 @@ breatheSeeApp.controller('MainCtrl', function ($scope, $http, Faye) {
     // Subscribe for state changes
     Faye.subscribe("/state", function(data) {
         $scope.state = data.state;
+        $scope.commsActive = true;
         if (data.message) {
             $scope.addMessage(data);
         }
         if (data.settings) {
             $scope.settings = data.settings;
+        }
+
+        if (($scope.state != 'disconnected') && (angular.equals({}, $scope.settings))) {
+            $scope.sendCmd('request_settings_current');
         }
     });
 
@@ -56,6 +61,7 @@ breatheSeeApp.controller('MainCtrl', function ($scope, $http, Faye) {
     $scope.sendCmd("request_settings_current");
     $scope.maxMessages = 50;
     $scope.settings = {};
+    $scope.commsActive = false;
 
     // Is the state known?
     $scope.stateIsKnown = function() {
@@ -73,6 +79,10 @@ breatheSeeApp.controller('MainCtrl', function ($scope, $http, Faye) {
 
     // What should we show on the state changer button?
     $scope.getStateButtonLabel = function() {
+        if (
+            ($scope.state == "disconnected")
+            || (($scope.state == "") && (!$scope.commsActive))
+        ) return "Disconnected";
         if ($scope.state == "") return "Busy...";
         if ($scope.badState()) return "Wait...";
         if ($scope.state == "waiting") return "Start";
