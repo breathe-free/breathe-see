@@ -20,3 +20,11 @@ node index.js & # run server in the background
 python example_publisher/main.py
 # Now visit http://<your_ip_address>:9090/ in a decent web browser
 ```
+
+### To-do
+
+* Allow static browsing of results directory
+* Basic tests?
+* Document the protocol a bit
+* Investigate supervisor.d
+* fabfile/similar
