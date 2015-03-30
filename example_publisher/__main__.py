@@ -69,6 +69,17 @@ STATES = enum(
 )
 ACTIVE_STATES = [ STATES.CALIBRATING, STATES.ANALYSING, STATES.COLLECTING ]
 
+DEFAULT_SETTINGS = {
+    "initialisation_time":      3,
+    "sample_collection_time":   3,
+    "collection_control":       "c",
+    "default_trigger_co2":      0.03,
+    "default_trigger_pressure": 4,
+    "auto_triggers":            True,
+    "collection_rate":          4,
+    "collection_limit":         5,
+}
+
 class Publisher:
     def __init__(self):
         self.lines_buffered = 0
@@ -76,6 +87,16 @@ class Publisher:
         self.buffer = ""
         self.state = None
         self.change_state(STATES.INITIALISING)
+        self.user_settings = {
+            "initialisation_time":      5,
+            "sample_collection_time":   2,
+            "collection_control":       "p",
+            "default_trigger_co2":      1.99,
+            "default_trigger_pressure": 9,
+            "auto_triggers":            False,
+            "collection_rate":          2,
+            "collection_limit":         7,
+        }
 
     def change_state(self, new_state, message=None, severity=None):
         if self.state != new_state:
@@ -102,15 +123,33 @@ class Publisher:
             try:
                 # read from sock
                 received = receive(sock)
-                if received is not None:
+                if received is not None and 'command' in received:
                     # act on information received
                     print "Received: %s" % received
-                    if received['command'] == "stop":
+                    
+                    do_what = received['command']
+                    if do_what == "stop":
                         self.change_state(STATES.WAITING)
-                    if received['command'] == "start":
+                    
+                    elif do_what == "start":
+                        self.emit_state(message="Using settings: " + json.dumps(received['settings']), severity="info")
                         self.change_state(STATES.CALIBRATING)
-                    if received['command'] == "request_state":
+
+                    elif do_what == "request_state":
                         self.emit_state()
+                    
+                    elif do_what == "request_settings_current":
+                        self.emit_state(settings=DEFAULT_SETTINGS)
+                    
+                    elif do_what == "apply_settings_default":
+                        self.emit_state(settings=DEFAULT_SETTINGS, message="Loaded to default settings.", severity="info")
+                    
+                    elif do_what == "apply_settings_user":
+                        self.emit_state(settings=self.user_settings, message="Loaded user settings.", severity="info")
+                    
+                    elif do_what == "save_settings":
+                        self.user_settings = received['settings']
+                        self.emit_state(settings=self.user_settings, message="Saved user settings.", severity="info")
 
                 # While running...
                 if self.state in ACTIVE_STATES:

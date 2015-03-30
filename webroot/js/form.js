@@ -18,11 +18,19 @@ breatheSeeApp.controller('MainCtrl', function ($scope, $http, Faye) {
         if (data.message) {
             $scope.addMessage(data);
         }
+        if (data.settings) {
+            $scope.settings = data.settings;
+        }
     });
 
     // Function for sending commands to the back end
-    $scope.sendCmd = function(cmd) {
-        Faye.publish("/commands", {command:cmd, commandType:"command"});
+    $scope.sendCmd = function(cmd, settings) {
+        var p =  {command:cmd, commandType:"command"};
+        if (settings) {
+            p['settings'] = settings;
+        }
+        Faye.publish("/commands", p);
+        $scope.state = "";  // wait for the back end to tell us about state changes, don't assume anything.
     }
 
     // What to do when new message received
@@ -34,11 +42,20 @@ breatheSeeApp.controller('MainCtrl', function ($scope, $http, Faye) {
         }
     }
 
+    // Handle form buttons for settings
+    $scope.saveSettings = function(form) {
+        $scope.sendCmd('save_settings', $scope.settings);
+    }
+    $scope.loadSettings = function(whichSettings) {
+        $scope.sendCmd("apply_settings_" + whichSettings);
+    }
+
     // Initialise
     $scope.state = "";
     $scope.messages = [];
-    $scope.sendCmd("request_state");
+    $scope.sendCmd("request_settings_current");
     $scope.maxMessages = 50;
+    $scope.settings = {};
 
     // Is the state known?
     $scope.stateIsKnown = function() {
@@ -65,8 +82,12 @@ breatheSeeApp.controller('MainCtrl', function ($scope, $http, Faye) {
     // Advance state.  If waiting, start.  Otherwise, stop.
     $scope.advanceState = function() {
         var cmd = ($scope.state == "waiting") ? "start":"stop";
-        $scope.sendCmd(cmd);
-        $scope.state = "";  // wait for the back end to tell us about state change, don't assume anything.
+        if (cmd == "start") {
+            // send settings chosen by user
+            $scope.sendCmd(cmd, $scope.settings);
+        } else {
+            $scope.sendCmd(cmd);
+        }
     }
 
 });
