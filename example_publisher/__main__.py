@@ -70,7 +70,7 @@ STATES = enum(
 ACTIVE_STATES = [ STATES.CALIBRATING, STATES.ANALYSING, STATES.COLLECTING ]
 
 DEFAULT_SETTINGS = {
-    "initialisation_time":      3,
+    "calibration_time":         3,
     "sample_collection_time":   3,
     "collection_control":       "c",
     "default_trigger_co2":      0.03,
@@ -88,7 +88,7 @@ class Publisher:
         self.state = None
         self.change_state(STATES.INITIALISING)
         self.user_settings = {
-            "initialisation_time":      5,
+            "calibration_time":         5,
             "sample_collection_time":   2,
             "collection_control":       "p",
             "default_trigger_co2":      1.99,
