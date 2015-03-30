@@ -8,6 +8,7 @@ import csv
 import json
 import random
 from sentence_generator import make_sentence
+from copy import deepcopy
 
 # csv file columns are timestamp, pressure, CO2, ...
 EXAMPLE_DATA      = os.path.join(os.path.dirname(__file__), "1427199271-sample-breathing.csv")
@@ -37,33 +38,35 @@ try:
     sock.setblocking(0)   # important - don't block on reads
     sock.connect(SOCKET_PATH)
     output = sock.sendall
-    def receive(the_socket):
-        # Return either None (if nothing received)
-        # or the JSON-decoded contents of any incoming message
-
-        # TODO: make this fn return an iterator.  Sometimes >1 message will have accumulated on the
-        # socket by the time we come to read it.
-        try:
-            incoming = the_socket.recv(1024)
-            for line in "\n".split(incoming):
-
-            return json.loads(incoming)
-        except ValueError:
-            print >>sys.stderr, str(ValueError)
-            print >>sys.stderr, incoming
-        except socket.error:
-            # nothing to read
-            return None
 
 except (SocketNotFound, socket.error), msg:
-    print >>sys.stderr, msg
-    print >>sys.stderr, "Will output to STDOUT instead of socket, starting in 2 sec."
-    time.sleep(2)
+    print >>sys.stderr, "Error connecting to %s.\n\n%s." % (SOCKET_PATH, msg)
+    sys.exit(1)
 
-    def printout(s):
-        print >>sys.stdout, s
-    output = printout
-    receive = lambda x: None
+def receive(the_socket):
+    # Act as an iterator.  Sometimes >1 message will have accumulated on the
+    # socket by the time we come to read it.
+    # Yield either None (if nothing received, buffer empty) or json decode line by line.
+    rbuffer = ''
+    while True:
+        try:
+            incoming = the_socket.recv(1024)
+            rbuffer += incoming
+        except socket.error:
+            # nothing to read
+            yield None
+            continue
+
+        while rbuffer.find("\n") != -1:
+            line, rbuffer = rbuffer.split("\n", 1)
+            try:
+                yield json.loads(line)
+            except ValueError, e:
+                print >>sys.stderr, str(e)
+                print >>sys.stderr, line
+
+
+
 
 def enum(**enums):
     return type('Enum', (), enums)
@@ -105,6 +108,7 @@ class Publisher:
             "collection_rate":          2,
             "collection_limit":         7,
         }
+        self.settings = deepcopy(DEFAULT_SETTINGS)
 
     def change_state(self, new_state, message=None, severity=None):
         if self.state != new_state:
@@ -130,7 +134,7 @@ class Publisher:
         while True:
             try:
                 # read from sock
-                received = receive(sock)
+                received = receive(sock).next()
                 if received is not None and 'command' in received:
                     # act on information received
                     print "Received: %s" % received
@@ -147,17 +151,20 @@ class Publisher:
                         self.emit_state()
                     
                     elif do_what == "request_settings_current":
-                        self.emit_state(settings=DEFAULT_SETTINGS)
+                        self.emit_state(settings=self.settings)
                     
                     elif do_what == "apply_settings_default":
-                        self.emit_state(settings=DEFAULT_SETTINGS, message="Loaded to default settings.", severity="info")
+                        self.settings = deepcopy(DEFAULT_SETTINGS)
+                        self.emit_state(settings=self.settings, message="Loaded default settings.", severity="info")
                     
                     elif do_what == "apply_settings_user":
-                        self.emit_state(settings=self.user_settings, message="Loaded user settings.", severity="info")
+                        self.settings = deepcopy(self.user_settings)
+                        self.emit_state(settings=self.settings, message="Loaded user settings.", severity="info")
                     
                     elif do_what == "save_settings":
                         self.user_settings = received['settings']
-                        self.emit_state(settings=self.user_settings, message="Saved user settings.", severity="info")
+                        self.settings = deepcopy(self.user_settings)
+                        self.emit_state(settings=self.settings, message="Saved user settings.", severity="info")
 
                 # While running...
                 if self.state in ACTIVE_STATES:
