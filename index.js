@@ -2,6 +2,7 @@
 
 var express          = require('express');
 var app              = express();
+var serveIndex       = require('serve-index');
 var sockfile         = '/tmp/lucidity.socket';
 var faye             = require('faye');
 var deflate          = require('permessage-deflate');
@@ -74,9 +75,15 @@ function handleSocketData(data) {
 var bufferedlines = [];
 function onData(line) {
 
-  // Parse JSON and immediately transmit.
+  // Parse and JSON and transmit, taking action if required.
   if (line.indexOf("{") >= 0) {
-    fayeClient.publish("/state", JSON.parse(line));
+    var line = JSON.parse(line);
+    if (line.results_dir) {
+      app.use('/results', express.static(line.results_dir));
+      app.use('/results', serveIndex(line.results_dir, {view: 'details'}));
+      console.log('Results directory', line.results_dir, 'made available on /results');
+    }
+    fayeClient.publish("/state", line);
     return;
   }
 
