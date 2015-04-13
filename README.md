@@ -28,3 +28,6 @@ python example_publisher/main.py
 * Document the protocol a bit
 * Investigate supervisor.d
 * fabfile/similar
+* Add pump on and off percentage user settings below automatic trigger setting option.
+* Display percentage completion of volume collected and time spent collecting. (both are user-defined limits, and status is included in the transmitted data string.)
+* include a legend for the graph.
