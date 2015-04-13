@@ -29,5 +29,6 @@ python example_publisher/main.py
 * Investigate supervisor.d
 * fabfile/similar
 * Add pump on and off percentage user settings below automatic trigger setting option.
-* Display percentage completion of volume collected and time spent collecting. (both are user-defined limits, and status is included in the transmitted data string.)
+* Display percentage completion of volume collected and time spent collecting. (both are already user-defined limits, and status is included in the transmitted data string.)
 * include a legend for the graph.
+* "Invert capture window" option - will be  a useful development option to see what is being missed. Boolean.
