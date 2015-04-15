@@ -18,6 +18,10 @@
             <div class="col col1">
                 <fieldset ng-disabled="state!='waiting'">
                 <p>
+                    <label class="label" for="filename">File name</label>
+                    <input ng-model="settings.filename" type="text" id="filename" name="filename" />
+                </p>
+                <p>
                     <label class="label" for="calibration_time">Calibration time</label>
                     <input ng-model="settings.calibration_time" type="number" id="calibration_time" name="calibration_time" />
                     sec
@@ -41,6 +45,33 @@
                 <p>
                     <label class="label" for="auto_triggers">Use auto-setting for trigger limits?</label>
                     <input ng-model="settings.auto_triggers" type="checkbox" id="auto_triggers" name="auto_triggers" />
+                </p>
+
+                <p>
+                    <label class="label">Pump on</label>
+                    <input ng-model="settings.capture_window.start.percent" type="number" min="5" max="95" id="start_capture_percent" name="start_capture_percent" /> %
+                    <select ng-model="settings.capture_window.start.gradient" id="start_capture_gradient" name="start_capture_gradient">
+                        <option>rising</option>
+                        <option>falling</option>
+                    </select>
+                </p>
+                <p>
+                    <label class="label">Pump off</label>
+                    <input ng-model="settings.capture_window.end.percent" type="number" min="5" max="95" id="end_capture_percent" name="end_capture_percent" /> %
+                    <select ng-model="settings.capture_window.end.gradient" id="end_capture_gradient" name="end_capture_gradient">
+                        <option>rising</option>
+                        <option>falling</option>
+                    </select>
+                </p>
+
+
+                <p>
+                    <label class="label" for="blank_capture">Blank capture?</label>
+                    <input ng-model="settings.blank_capture" type="checkbox" id="blank_capture" name="blank_capture" />
+                </p>
+                <p>
+                    <label class="label" for="total_breath">Total breath?</label>
+                    <input ng-model="settings.total_breath" type="checkbox" id="total_breath" name="total_breath" />
                 </p>
                 <p>
                     <label class="label" for="collection_rate">Sample collection rate - instantaneous</label>

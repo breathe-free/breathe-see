@@ -26,15 +26,9 @@ python example_publisher
 Most "impactful" stuff at the top:
 
 * supervisor.d - a way to start processes on boot, and restart them thru a browser
-* Add "Blank capture" option. Yes/no - default to user settings/no
-* Add "Total breath" option. Yes/no - default to user settings/no
-* "Filename" - single line input to be used by the data collector when generating file name
 * Percentage completion of volume collected and time spent collecting. (both are already user-defined limits, and status is included in the transmitted data string.)
     We'll get the python to emit these values in JSON and just display them. No calculation in the viewer.
 * Include a legend for the graph.
-* Capture window options:
-    Pump on  [5-95]% [rising/falling]
-    Pump off [5-95]% [rising/falling]
 
 Soonish:
 

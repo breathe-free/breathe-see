@@ -86,8 +86,21 @@ DEFAULT_SETTINGS = {
     "sample_collection_time":   3,
     "collection_control":       "c",
     "auto_triggers":            True,
+    "blank_capture":            False,
+    "total_breath":             False,
     "collection_rate":          4,
     "collection_limit":         5,
+    "filename":                 "",
+    "capture_window": {
+        "start": { 
+            "percent":  85,
+            "gradient": "rising"
+        },
+        "end": { 
+            "percent":  15,
+            "gradient": "falling"
+        },
+    }
 }
 
 class Publisher:
@@ -102,8 +115,21 @@ class Publisher:
             "sample_collection_time":   2,
             "collection_control":       "p",
             "auto_triggers":            False,
+            "blank_capture":            False,
+            "total_breath":             False,
             "collection_rate":          2,
             "collection_limit":         7,
+            "filename":                 "myfile",
+            "capture_window": {
+                "start": { 
+                    "percent":  62,
+                    "gradient": "rising"
+                },
+                "end": { 
+                    "percent":  9,
+                    "gradient": "falling"
+                },
+            }
         }
         self.settings = deepcopy(DEFAULT_SETTINGS)
 
