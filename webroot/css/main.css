@@ -8,12 +8,15 @@ path {
     fill: none;
 }
 path.line0 {
+    /* pressure */
 	stroke: red;
 }
 path.line1 {
+    /* co2 */
 	stroke: steelblue;
 }
 path.line2 {
+    /* ??? */
 	stroke: darkgreen;
 	stroke-width: 1;
 }
@@ -98,4 +101,7 @@ fieldset {
 }
 .col1 p {
     margin: 0 0 0.5em 0;
+}
+.legend p {
+    margin: 0 5%;
 }

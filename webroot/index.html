@@ -8,6 +8,10 @@
 <body>
     <div id="svg_wrap">
         <svg />
+        <div class="legend">
+            <p style="color: red; float: left;">Pressure / Pa</p>
+            <p style="color: #4682b4; float: right;">CO<sub>2</sub> / %</p>
+        </div>
     </div>
     <div ng-app="breatheSeeApp">
         <form ng-controller="MainCtrl" id="main" name="mainform" ng-submit="saveSettings(mainform)">
