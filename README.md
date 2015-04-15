@@ -32,3 +32,7 @@ python example_publisher/main.py
 * Display percentage completion of volume collected and time spent collecting. (both are already user-defined limits, and status is included in the transmitted data string.)
 * include a legend for the graph.
 * "Invert capture window" option - will be  a useful development option to see what is being missed. Boolean.
+* More complex capture window options - lets talk about this. Needs a graphical description!
+* Add "Blank capture" option
+* Add "Total breath" option
+* There will be more - primarily relating to a second capture system (lets start thinking about putting these options in tabs)
