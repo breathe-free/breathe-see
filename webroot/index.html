@@ -46,7 +46,6 @@
                     <label class="label" for="auto_triggers">Use auto-setting for trigger limits?</label>
                     <input ng-model="settings.auto_triggers" type="checkbox" id="auto_triggers" name="auto_triggers" />
                 </p>
-
                 <p>
                     <label class="label">Pump on</label>
                     <input ng-model="settings.capture_window.start.percent" type="number" min="5" max="95" id="start_capture_percent" name="start_capture_percent" /> %
@@ -63,8 +62,6 @@
                         <option>falling</option>
                     </select>
                 </p>
-
-
                 <p>
                     <label class="label" for="blank_capture">Blank capture?</label>
                     <input ng-model="settings.blank_capture" type="checkbox" id="blank_capture" name="blank_capture" />
