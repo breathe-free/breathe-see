@@ -16,6 +16,7 @@ SAMPLE_DATA       = os.path.join(SAMPLE_DATA_DIR, "1427199271-sample-breathing.c
 SOCKET_PATH       = '/tmp/lucidity.socket'
 TIME_WARP         = float(os.environ.get('TIME_WARP', 1.0))
 MAX_LINES_AT_ONCE = int(os.environ.get('MAX_LINES_AT_ONCE', 1))
+EMIT_RANDOM_MSGS  = bool(os.environ.get('GIBBERISH', False))
 
 class SocketNotFound(Exception):
     pass
@@ -243,17 +244,18 @@ class Publisher:
                     self.index = 0
 
                 # Emit some random debugging every now and then
-                if self.state == STATES.WAITING:
-                    if random.random() < 0.1:
-                        self.emit(message="Waiting" + "." * random.randint(2,5))
-                else:
-                    x = random.random()
-                    if x < 0.05:
-                        self.emit(message="ERROR: " + make_sentence(), severity="error")
-                    elif x < 0.1:
-                        self.emit(message="WARNING: " + make_sentence(), severity="warning")
-                    elif x < 0.5:
-                        self.emit(message=make_sentence())
+                if EMIT_RANDOM_MSGS:
+                    if self.state == STATES.WAITING:
+                        if random.random() < 0.1:
+                            self.emit(message="Waiting" + "." * random.randint(2,5))
+                    else:
+                        x = random.random()
+                        if x < 0.05:
+                            self.emit(message="ERROR: " + make_sentence(), severity="error")
+                        elif x < 0.1:
+                            self.emit(message="WARNING: " + make_sentence(), severity="warning")
+                        elif x < 0.5:
+                            self.emit(message=make_sentence())
 
                 time.sleep(0.2 / TIME_WARP)
 
