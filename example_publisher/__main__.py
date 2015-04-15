@@ -11,7 +11,8 @@ from sentence_generator import make_sentence
 from copy import deepcopy
 
 # csv file columns are timestamp, pressure, CO2, ...
-EXAMPLE_DATA      = os.path.join(os.path.dirname(__file__), "1427199271-sample-breathing.csv")
+SAMPLE_DATA_DIR   = os.path.join(os.path.dirname(__file__), "sample_data")
+SAMPLE_DATA       = os.path.join(SAMPLE_DATA_DIR, "1427199271-sample-breathing.csv")
 SOCKET_PATH       = '/tmp/lucidity.socket'
 TIME_WARP         = float(os.environ.get('TIME_WARP', 1.0))
 MAX_LINES_AT_ONCE = int(os.environ.get('MAX_LINES_AT_ONCE', 1))
@@ -21,7 +22,7 @@ class SocketNotFound(Exception):
 
 # Read in data from the example csv file
 datapoints = []
-with open(EXAMPLE_DATA, 'rb') as csvfile:
+with open(SAMPLE_DATA, 'rb') as csvfile:
     datareader = csv.reader(csvfile)
     for row in datareader:
         datapoints.append([float(x) for x in row])
@@ -116,9 +117,9 @@ class Publisher:
             severity = "info"
 
         self.state = new_state
-        self.emit_state(message=message, severity="info")
+        self.emit(message=message, severity="info")
 
-    def emit_state(self, **kwargs):
+    def emit(self, **kwargs):
         h = {"state": self.state}
         for key,val in kwargs.iteritems():
             h[key] = val
@@ -144,27 +145,27 @@ class Publisher:
                         self.change_state(STATES.WAITING)
                     
                     elif do_what == "start":
-                        self.emit_state(message="Using settings: " + json.dumps(received['settings']), severity="info")
+                        self.emit(message="Using settings: " + json.dumps(received['settings']), severity="info", results_dir=SAMPLE_DATA_DIR)
                         self.change_state(STATES.CALIBRATING)
 
                     elif do_what == "request_state":
-                        self.emit_state()
+                        self.emit()
                     
                     elif do_what == "request_settings_current":
-                        self.emit_state(settings=self.settings)
+                        self.emit(settings=self.settings, results_dir=SAMPLE_DATA_DIR)
                     
                     elif do_what == "apply_settings_default":
                         self.settings = deepcopy(DEFAULT_SETTINGS)
-                        self.emit_state(settings=self.settings, message="Loaded default settings.", severity="info")
+                        self.emit(settings=self.settings, message="Loaded default settings.", severity="info")
                     
                     elif do_what == "apply_settings_user":
                         self.settings = deepcopy(self.user_settings)
-                        self.emit_state(settings=self.settings, message="Loaded user settings.", severity="info")
+                        self.emit(settings=self.settings, message="Loaded user settings.", severity="info")
                     
                     elif do_what == "save_settings":
                         self.user_settings = received['settings']
                         self.settings = deepcopy(self.user_settings)
-                        self.emit_state(settings=self.settings, message="Saved user settings.", severity="info")
+                        self.emit(settings=self.settings, message="Saved user settings.", severity="info")
 
                 # While running...
                 if self.state in ACTIVE_STATES:
@@ -204,15 +205,15 @@ class Publisher:
                 # Emit some random debugging every now and then
                 if self.state == STATES.WAITING:
                     if random.random() < 0.1:
-                        self.emit_state(message="Waiting" + "." * random.randint(2,5))
+                        self.emit(message="Waiting" + "." * random.randint(2,5))
                 else:
                     x = random.random()
                     if x < 0.05:
-                        self.emit_state(message="ERROR: " + make_sentence(), severity="error")
+                        self.emit(message="ERROR: " + make_sentence(), severity="error")
                     elif x < 0.1:
-                        self.emit_state(message="WARNING: " + make_sentence(), severity="warning")
+                        self.emit(message="WARNING: " + make_sentence(), severity="warning")
                     elif x < 0.5:
-                        self.emit_state(message=make_sentence())
+                        self.emit(message=make_sentence())
 
                 time.sleep(0.2 / TIME_WARP)
 

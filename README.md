@@ -17,13 +17,12 @@ cd breathe-free
 npm install
 bower install
 node index.js & # run server in the background
-python example_publisher/main.py
+python example_publisher
 # Now visit http://<your_ip_address>:9090/ in a decent web browser
 ```
 
 ### To-do
 
-* Allow static browsing of results directory
 * Basic tests?
 * Document the protocol a bit
 * Investigate supervisor.d
@@ -36,3 +35,7 @@ python example_publisher/main.py
 * Add "Blank capture" option
 * Add "Total breath" option
 * There will be more - primarily relating to a second capture system (lets start thinking about putting these options in tabs)
+
+### Misc. features
+
+* Browsing and download of files in a results directory

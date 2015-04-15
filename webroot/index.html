@@ -75,6 +75,9 @@
                         <p ng-repeat="item in messages track by $index" class="{{ item.severity }}">{{ item.message }}</p>
                     </div>
                 </div>
+                <p ng-show="resultsAvailable"  >
+                    <a href="/results" target="results">View output directory</a>
+                </p>
             </div>
         </form>
     </div>
