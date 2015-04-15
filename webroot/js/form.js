@@ -28,6 +28,13 @@ breatheSeeApp.controller('MainCtrl', function ($scope, $http, Faye) {
         if (data.collection_completion) {
             $scope.collectionCompletion = data.collection_completion;
         }
+        if (data.is_simulation) {
+            // It seems we are talking to a development publisher.  Enable nudge button etc.
+            $scope.clientIsSimulation = true;
+            $scope.nudgeClient = function(e) {
+                $scope.sendCmd('nudge');
+            }
+        }
 
         if (($scope.state != 'disconnected') && (angular.equals({}, $scope.settings))) {
             $scope.sendCmd('request_settings_current');
@@ -73,6 +80,7 @@ breatheSeeApp.controller('MainCtrl', function ($scope, $http, Faye) {
         volume: 0,
         time:   0
     };
+    $scope.clientIsSimulation = false;  // Only set to true for testing/development purposes
 
     // Is the state known?
     $scope.stateIsKnown = function() {

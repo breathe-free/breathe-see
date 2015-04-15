@@ -102,8 +102,11 @@
                         <p ng-repeat="item in messages track by $index" class="{{ item.severity }}">{{ item.message }}</p>
                     </div>
                 </div>
-                <p ng-show="resultsAvailable"  >
+                <p ng-show="resultsAvailable">
                     <a href="/results" target="results">View output directory</a>
+                    <span ng-show="clientIsSimulation" style="float: right;">
+                        <a href="" ng-click="nudgeClient();">Nudge</a>
+                    </span>
                 </p>
             </div>
         </form>

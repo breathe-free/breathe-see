@@ -154,9 +154,14 @@ class Publisher:
         self.set_completion(0, 0)
 
     def emit(self, **kwargs):
-        h = {"state": self.state}
+        h = {
+            "state": self.state,
+            "is_simulation": True   # DON'T include this member in a real publisher's messages
+        }
+
         for key,val in kwargs.iteritems():
             h[key] = val
+        
         output(json.dumps(h) + "\n")        
 
     def run(self):
@@ -170,6 +175,7 @@ class Publisher:
             try:
                 # read from sock
                 received = receive(sock).next()
+                been_nudged = False
                 if received is not None and 'command' in received:
                     # act on information received
                     print "Received: %s" % received
@@ -201,10 +207,13 @@ class Publisher:
                         self.settings = deepcopy(self.user_settings)
                         self.emit(settings=self.settings, message="Saved user settings.", severity="info")
 
+                    elif do_what == "nudge":
+                        been_nudged = True
+
                 # While running...
                 if self.state in ACTIVE_STATES:
                     # ...cycle through active states to simulate instrument doing things
-                    if random.random() < 0.03:
+                    if been_nudged:
                         current = ACTIVE_STATES.index(self.state)
                         next = ( current + 1 ) % len(ACTIVE_STATES)
                         self.change_state(ACTIVE_STATES[next])
