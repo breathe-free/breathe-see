@@ -19,7 +19,7 @@
                 <p ng-class="{ white: !stateIsKnown() }">
                     Current state: {{ state }}.
                     <span ng-show="state == 'collecting'">
-                        <br>Collection completion: {{ collection_completion.time | number:0 }}% by volume, {{ collection_completion.volume | number:0 }}% by time.
+                        Completed: {{ collectionCompletion.volume | number:0 }}% by volume, {{ collectionCompletion.time | number:0 }}% by time.
                     </span>
                 </p>
                 <button ng-click="advanceState();" ng-disabled="badState()">{{ getStateButtonLabel() }}</button>

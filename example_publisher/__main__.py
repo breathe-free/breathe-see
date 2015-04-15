@@ -132,6 +132,16 @@ class Publisher:
             }
         }
         self.settings = deepcopy(DEFAULT_SETTINGS)
+        self.set_completion(0,0)
+
+    def set_completion(self, by_volume, by_time):
+        self.collection_completion = {
+            "volume":  min(100, by_volume),
+            "time":    min(100, by_time),
+        }
+        self.emit(
+            collection_completion = self.collection_completion,
+        )
 
     def change_state(self, new_state, message=None, severity=None):
         if self.state != new_state:
@@ -140,6 +150,7 @@ class Publisher:
 
         self.state = new_state
         self.emit(message=message, severity="info")
+        self.set_completion(0, 0)
 
     def emit(self, **kwargs):
         h = {"state": self.state}
@@ -196,6 +207,13 @@ class Publisher:
                         current = ACTIVE_STATES.index(self.state)
                         next = ( current + 1 ) % len(ACTIVE_STATES)
                         self.change_state(ACTIVE_STATES[next])
+
+                # Emit incrementing completion data during simulated collection
+                if self.state == STATES.COLLECTING:
+                    self.set_completion(
+                        by_volume = self.collection_completion["volume"] + random.random() * 5,
+                        by_time   = self.collection_completion["time"]   + 2.5,
+                    )
 
                 # Get data (ultimately this comes from the sample file)
                 datapoint = datapoints[self.index]

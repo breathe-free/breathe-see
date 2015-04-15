@@ -25,6 +25,9 @@ breatheSeeApp.controller('MainCtrl', function ($scope, $http, Faye) {
         if (data.results_dir) {
             $scope.resultsAvailable = true;
         }
+        if (data.collection_completion) {
+            $scope.collectionCompletion = data.collection_completion;
+        }
 
         if (($scope.state != 'disconnected') && (angular.equals({}, $scope.settings))) {
             $scope.sendCmd('request_settings_current');
@@ -66,6 +69,10 @@ breatheSeeApp.controller('MainCtrl', function ($scope, $http, Faye) {
     $scope.settings = {};
     $scope.commsActive = false;
     $scope.resultsAvailable = false;
+    $scope.collectionCompletion = {
+        volume: 0,
+        time:   0
+    };
 
     // Is the state known?
     $scope.stateIsKnown = function() {
