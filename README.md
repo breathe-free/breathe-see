@@ -2,12 +2,16 @@
 
 Getting data from a sampling device to a web browser in (near) real-time.
 
-### Set up
+### Set up using ansible
+
+You can get everything in place by using ansible and https://github.com/breathe-free/setup-sampler
+
+### Set up by hand
 
 Requirements:
 
 * something that can write to a unix socket (example publisher provided in python)
-* nodejs (working with v0.10.28 for now)
+* nodejs (working with v0.10.28 for now, see useful_scripts dir)
 * bower
 * decent web browser
 
@@ -23,20 +27,10 @@ python example_publisher
 
 ### To-do
 
-Most "impactful" stuff at the top:
-
-* supervisor.d - a way to start processes on boot, and restart them thru a browser
-
-* Soonish:
-
 * There will be more - primarily relating to a second capture system (let's start thinking about putting these options in tabs)
 * Document the protocol a bit
+* Document the interface a bit more
 
 When we get chance:
 
 * Basic tests
-* fabfile/similar - a way to deploy our stuff onto a clean fresh computer
-
-### Misc. features
-
-* Browsing and download of files in a results directory
