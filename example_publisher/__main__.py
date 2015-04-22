@@ -9,6 +9,7 @@ import json
 import random
 from sentence_generator import make_sentence
 from copy import deepcopy
+from subprocess import check_output
 
 # csv file columns are timestamp, pressure, CO2, ...
 SAMPLE_DATA_DIR   = os.path.join(os.path.dirname(__file__), "sample_data")
@@ -110,6 +111,9 @@ class Publisher:
         self.index = 0
         self.buffer = ""
         self.state = None
+        # get own version
+        self.version = check_output(['git','describe','--tags'])
+
         self.change_state(STATES.INITIALISING)
         self.user_settings = {
             "calibration_time":         5,
@@ -156,6 +160,7 @@ class Publisher:
     def emit(self, **kwargs):
         h = {
             "state": self.state,
+            "version": self.version,
             "is_simulation": True   # DON'T include this member in a real publisher's messages
         }
 

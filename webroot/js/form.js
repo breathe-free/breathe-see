@@ -37,6 +37,9 @@ breatheSeeApp.controller('MainCtrl', function ($scope, $http, Faye) {
         if (data.settings) {
             $scope.settings = data.settings;
         }
+        if (data.version) {
+            $scope.versionInfo.backend = data.version.trim();
+        }
         if (data.results_dir) {
             $scope.resultsAvailable = true;
         }
