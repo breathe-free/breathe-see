@@ -14,6 +14,12 @@ breatheSeeApp.controller('MainCtrl', function ($scope, $http, Faye) {
 
     // Subscribe for state changes
     Faye.subscribe("/state", function(data) {
+
+        // Reset tube id when state becomes 'waiting'.
+        if (($scope.state == '') && (data.state == 'waiting')) {
+            $scope.settings.tube_id = null;
+        }
+
         $scope.state = data.state;
         $scope.commsActive = true;
         if (data.message) {
@@ -36,6 +42,7 @@ breatheSeeApp.controller('MainCtrl', function ($scope, $http, Faye) {
             }
         }
 
+        // Request current settings if we are connected and don't yet have any.
         if (($scope.state != 'disconnected') && (angular.equals({}, $scope.settings))) {
             $scope.sendCmd('request_settings_current');
         }
@@ -112,6 +119,12 @@ breatheSeeApp.controller('MainCtrl', function ($scope, $http, Faye) {
     $scope.advanceState = function() {
         var cmd = ($scope.state == "waiting") ? "start":"stop";
         if (cmd == "start") {
+            // Refuse to progress unless Tube ID has been supplied
+            if (!($scope.settings.tube_id)) {
+                document.getElementById("tube_id").focus();
+                alert('Tube ID is required.');
+                return;
+            }
             // send settings chosen by user
             $scope.sendCmd(cmd, $scope.settings);
         } else {

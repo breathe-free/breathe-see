@@ -185,8 +185,8 @@ class Publisher:
                         self.change_state(STATES.WAITING)
                     
                     elif do_what == "start":
-                        self.emit(message="Using settings: " + json.dumps(received['settings']), severity="info", results_dir=SAMPLE_DATA_DIR)
                         self.change_state(STATES.CALIBRATING)
+                        self.emit(message="Using settings: " + json.dumps(received['settings']), severity="info", results_dir=SAMPLE_DATA_DIR)
 
                     elif do_what == "request_state":
                         self.emit()
@@ -215,8 +215,11 @@ class Publisher:
                     # ...cycle through active states to simulate instrument doing things
                     if been_nudged:
                         current = ACTIVE_STATES.index(self.state)
-                        next = ( current + 1 ) % len(ACTIVE_STATES)
-                        self.change_state(ACTIVE_STATES[next])
+                        next = current + 1
+                        if next >= len(ACTIVE_STATES):
+                            self.change_state(STATES.WAITING)
+                        else:
+                            self.change_state(ACTIVE_STATES[next])
 
                 # Emit incrementing completion data during simulated collection
                 if self.state == STATES.COLLECTING:

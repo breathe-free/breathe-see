@@ -14,7 +14,7 @@
         </div>
     </div>
     <div ng-app="breatheSeeApp">
-        <form ng-controller="MainCtrl" id="main" name="mainform" ng-submit="saveSettings(mainform)">
+        <form ng-controller="MainCtrl" id="main" name="mainform">
             <div class="state">
                 <p ng-class="{ white: !stateIsKnown() }">
                     Current state: {{ state }}.
@@ -22,13 +22,17 @@
                         Completed: {{ collectionCompletion.volume | number:0 }}% by volume, {{ collectionCompletion.time | number:0 }}% by time.
                     </span>
                 </p>
-                <button ng-click="advanceState();" ng-disabled="badState()">{{ getStateButtonLabel() }}</button>
+                <input type="button" ng-click="advanceState();" ng-disabled="badState()" value="{{ getStateButtonLabel() }}"></input>
             </div>
             <div class="col col1">
                 <fieldset ng-disabled="state!='waiting'">
                 <p>
                     <label class="label" for="filename">File name</label>
                     <input ng-model="settings.filename" type="text" id="filename" name="filename" />
+                </p>
+                <p>
+                    <label class="label" for="tube_id">Tube ID</label>
+                    <input ng-model="settings.tube_id" type="text" id="tube_id" name="tube_id" />
                 </p>
                 <p>
                     <label class="label" for="blank_capture">Blank capture?</label>
@@ -90,9 +94,9 @@
                     ml/min
                 </p>
                 <p style="padding-left: 30px;">
-                    <input type="submit" name="action" value="Save user settings" ng-hide="state!='waiting'" />
+                    <input type="button" name="action" value="Save user settings" ng-hide="state!='waiting'" ng-click="saveSettings(mainform)"/>
                     <input type="button" name="action" value="Load user settings" ng-hide="state!='waiting'" ng-click="loadSettings('user')" />
-                    <input type="button" name="action" value="Load defaults" ng-hide="state!='waiting'" ng-click="loadSettings('default')" />
+                    <input type="button" name="action" value="Load defaults"      ng-hide="state!='waiting'" ng-click="loadSettings('default')" />
                 </p>
                 </fieldset>
             </div>
