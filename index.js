@@ -16,7 +16,7 @@ var htmlroot         = 'webroot';
 var port             = 9090;
 var bufferPublishing = false;  // set to True to only publish every so often
 var publishInterval  = 250;    // ms.  Ignored unless bufferPublishing is true
-
+var exec             = require('child_process').exec;
 
 // Inter-process comms with other process
 console.log('Looking for socket %s', sockfile);
@@ -125,4 +125,23 @@ fayeClient.subscribe('/commands', function(command) {
     return;
   }
   sendCommand(command);
+});
+
+// Expose own version number on /version
+var version = 'unknown';
+app.use('/version', function(req, res) {
+  res.end(version);
+});
+
+// Request own version
+var child = exec('git describe --tags',
+  function (error, stdout, stderr) {
+    if ((stderr !== null) && (stderr.length > 0)) {
+      console.log('Stderr getting version: ' + stderr);
+    }
+    if (error !== null) {
+      console.log('Error getting version: ' + error);
+    }
+    version = stdout;
+    console.log('Version ' + version);
 });

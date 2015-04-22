@@ -10,6 +10,15 @@ breatheSeeApp.factory('Faye', [
   }
 ]);
 
+// Ensure trim() present for strings
+if(typeof(String.prototype.trim) === "undefined")
+{
+    String.prototype.trim = function() 
+    {
+        return String(this).replace(/^\s+|\s+$/g, '');
+    };
+}
+
 breatheSeeApp.controller('MainCtrl', function ($scope, $http, Faye) {
 
     // Subscribe for state changes
@@ -46,6 +55,13 @@ breatheSeeApp.controller('MainCtrl', function ($scope, $http, Faye) {
         if (($scope.state != 'disconnected') && (angular.equals({}, $scope.settings))) {
             $scope.sendCmd('request_settings_current');
         }
+    });
+
+    // Request version
+    $http.get('/version').success(function(data) {
+        $scope.versionInfo.ui = data.trim();
+    }).error(function() {
+        console.log('Couldn\'t get version.');
     });
 
     // Function for sending commands to the back end
@@ -91,6 +107,10 @@ breatheSeeApp.controller('MainCtrl', function ($scope, $http, Faye) {
         time:   0
     };
     $scope.clientIsSimulation = false;  // Only set to true for testing/development purposes
+    $scope.versionInfo = {
+        ui:      'unknown',
+        backend: 'unknown'
+    };
 
     // Is the state known?
     $scope.stateIsKnown = function() {
