@@ -26,9 +26,7 @@ python example_publisher
 ```
 
 ### To-do
-* Pass the current date with collection settings to the sampler software for data tagging
-* Request a unique tube ID for each sample collected, and clear this field after start has been pressed. Do not allow collection to start with this field empty
-* There will be more - primarily relating to a second capture system (let's start thinking about putting these options in tabs)
+* Think about handling a second, third (...) capture system (let's start thinking about putting these options in tabs)
 * Document the protocol a bit
 * Document the interface a bit more
 
