@@ -49,10 +49,13 @@ breatheSeeApp.controller('MainCtrl', function ($scope, $http, Faye) {
     });
 
     // Function for sending commands to the back end
-    $scope.sendCmd = function(cmd, settings) {
+    $scope.sendCmd = function(cmd, settings, timestamp) {
         var p =  {command:cmd, commandType:"command"};
         if (settings) {
             p['settings'] = settings;
+        }
+        if (timestamp) {
+            p['timestamp'] = timestamp;
         }
         Faye.publish("/commands", p);
         $scope.state = "";  // wait for the back end to tell us about state changes, don't assume anything.
@@ -126,7 +129,7 @@ breatheSeeApp.controller('MainCtrl', function ($scope, $http, Faye) {
                 return;
             }
             // send settings chosen by user
-            $scope.sendCmd(cmd, $scope.settings);
+            $scope.sendCmd(cmd, $scope.settings, Math.floor(Date.now() / 1000));
         } else {
             $scope.sendCmd(cmd);
         }

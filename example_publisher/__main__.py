@@ -187,6 +187,7 @@ class Publisher:
                     elif do_what == "start":
                         self.change_state(STATES.CALIBRATING)
                         self.emit(message="Using settings: " + json.dumps(received['settings']), severity="info", results_dir=SAMPLE_DATA_DIR)
+                        self.emit(message="Got timestamp: " +  json.dumps(received['timestamp']), severity="info")
 
                     elif do_what == "request_state":
                         self.emit()
